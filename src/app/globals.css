@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /*
+   * Brand palette.
+   *   Dark Navy  #0B0728   Copper #C6844A
+   *   White      #FFFFFF   Light Gray #D8D8D8
+   *
+   * The navy-tinted neutrals below are derived from the brand navy so that
+   * body text, muted text and borders stay in the same hue family.
+   * Contrast ratios noted are against the surface each token is used on.
+   */
+  --color-navy: #0b0728; /* 19.5:1 on white; matches the logo's own background */
+  --color-navy-800: #1a1338; /* elevated dark surface */
+  --color-navy-600: #565073; /* body text on light — 7.5:1 */
+  --color-navy-500: #726c8c; /* muted text on light — 5.0:1 */
+  --color-navy-300: #8b86a0; /* form-control borders — 3.5:1 */
+
+  --color-line: #d8d8d8; /* brand light gray — decorative dividers only */
+  --color-mist: #f5f4f8; /* alternating light section surface */
+
+  /* Copper reads on dark only (6.25:1 on navy, 3.09:1 on white).
+     Use copper-700 for accent text on light surfaces — 5.2:1 on white. */
+  --color-copper: #c6844a;
+  --color-copper-700: #9a5f2b;
+
+  --color-success: #146b45;
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid display sizes: one clamp() replaces four responsive overrides each. */
+  --text-hero: clamp(2.5rem, 1.25rem + 5vw, 5.25rem);
+  --text-hero--line-height: 0.98;
+  --text-hero--letter-spacing: -0.02em;
+
+  --text-section: clamp(2rem, 1rem + 3.2vw, 3.5rem);
+  --text-section--line-height: 1.05;
+  --text-section--letter-spacing: -0.015em;
+
+  /*
+   * Motion.
+   *
+   * `--ease-smooth` is easeInOutCubic — it accelerates and decelerates, which
+   * is what suits a state change (hover, colour, the header turning solid).
+   * Overriding Tailwind's two `--default-transition-*` variables applies it to
+   * every `transition-*` utility on the site, so no component sets its own.
+   *
+   * `--ease-out-expo` stays for *entrances*. Something arriving on screen
+   * should start fast and settle gently; easing it in as well makes it feel
+   * like it hesitated before moving.
+   */
+  --ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --default-transition-timing-function: var(--ease-smooth);
+  --default-transition-duration: 300ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  body {
+    background-color: #ffffff;
+    color: var(--color-navy);
+    font-family: var(--font-sans);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :focus-visible {
+    outline: 2px solid var(--color-copper-700);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  /* The preloader finishes lifting at ~1.15s. Hero entrances wait for it so
+     they aren't played out of sight behind the overlay. */
+  --enter-delay: 1.15s;
+}
+
+/*
+ * Preloader. Pure CSS: no JS to download, nothing to hang on, and it clears
+ * itself whether or not hydration ever happens.
+ *
+ * Default is `display: none` so reduced-motion users — and any browser that
+ * ignores the animation — go straight to the page rather than being trapped
+ * behind an overlay that never lifts.
+ */
+.preloader {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1.75rem;
+    background-color: var(--color-navy);
+    animation: preloader-lift 0.6s var(--ease-smooth) 0.9s forwards;
+  }
+
+  .preloader-mark {
+    animation: preloader-mark 0.7s var(--ease-out-expo) backwards;
+  }
+
+  .preloader-bar {
+    position: relative;
+    width: 7.5rem;
+    height: 2px;
+    overflow: hidden;
+    background-color: rgb(255 255 255 / 0.15);
+  }
+
+  .preloader-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform-origin: left;
+    background-color: var(--color-copper);
+    animation: preloader-fill 0.9s var(--ease-out-expo) forwards;
+  }
+}
+
+@keyframes preloader-lift {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@keyframes preloader-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes preloader-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/*
+ * Entrance reveal for above-the-fold content.
+ *
+ * Deliberately pure CSS, not GSAP: this paints on the first frame instead of
+ * waiting for hydration, which keeps the hero <h1> (the LCP element) off the
+ * JS critical path. Stagger via an inline `animation-delay`.
+ *
+ * Elements are visible by default and only animate when motion is welcome, so
+ * reduced-motion users and the no-JS/no-animation case always see content.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: reveal 0.7s var(--ease-out-expo) backwards;
+  }
+}
+
+/*
+ * Scroll-linked reveal for below-the-fold content.
+ *
+ * Uses a CSS scroll-driven animation rather than GSAP or an IntersectionObserver:
+ * no JS, no bundle cost, and it runs off the main thread. Content is visible by
+ * default, so browsers without `animation-timeline` support (Firefox today) and
+ * reduced-motion users simply see the finished state.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .rise {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
 }

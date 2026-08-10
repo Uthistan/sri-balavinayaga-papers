@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react";
 import { LOGO, NAV_LINKS } from "@/lib/site";
 
 /**
- * Fixed header: transparent over the hero, navy once the user scrolls past it.
+ * Fixed header: fully transparent over the hero, liquid glass once scrolled.
  *
  * It stays dark in both states because the logo artwork sits on a dark
  * background — a white bar would show a navy block behind the mark. Keeping one
@@ -37,28 +37,35 @@ export function SiteHeader() {
   const solid = scrolled || open;
 
   return (
-    /*
-     * The bar is opaque navy at all times, not transparent over the hero.
-     *
-     * The logo file is a JPEG with a flat #0C0628 background baked in. Over the
-     * hero's gradient — which ranges from #0F0A2D to #291D47 behind the header —
-     * that flat rectangle is plainly visible. A solid bar gives it a flat
-     * surface to sit on, where the 1-value difference is imperceptible.
-     *
-     * Supply a transparent PNG or SVG logo and this can go back to being
-     * transparent over the hero.
-     */
-    <header
-      className={`fixed inset-x-0 top-0 z-50 bg-navy text-white transition-colors duration-300 ${
-        solid ? "border-b border-white/10" : "border-b border-transparent"
-      }`}
-    >
-      <div className="mx-auto flex h-24 max-w-6xl items-center justify-between px-5 sm:h-28 sm:px-8">
+    <header className="fixed inset-x-0 top-0 z-50 text-white">
+      {/*
+       * The glass pane is a separate layer rather than a background on the
+       * <header> so the whole effect — blur, tint, edge highlight — can be
+       * cross-faded with one `opacity` transition. Negative z-index keeps it
+       * behind the bar contents while staying inside the header's stacking
+       * context, which is what lets the logo blend against it (below).
+       *
+       * It is `inset-0`, so when the mobile panel is open the header grows and
+       * the glass grows with it — the panel needs no surface of its own.
+       */}
+      <div
+        aria-hidden
+        className={`glass-nav absolute inset-0 -z-10 transition-opacity duration-500 ${
+          solid ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      <div
+        className={`mx-auto flex max-w-6xl items-center justify-between px-5 transition-[height] duration-500 sm:px-8 ${
+          solid ? "h-24 sm:h-28" : "h-28 sm:h-32"
+        }`}
+      >
         <Link
           href="/"
           className="block shrink-0"
           onClick={() => setOpen(false)}
         >
+          {/* Shrinks with the bar, so the two heights stay in proportion. */}
           <Image
             src={LOGO.src}
             alt={LOGO.alt}
@@ -66,7 +73,9 @@ export function SiteHeader() {
             height={LOGO.height}
             quality={90}
             priority
-            className="h-16 w-auto sm:h-20"
+            className={`w-auto transition-[height] duration-500 ${
+              solid ? "h-14 sm:h-16" : "h-18 sm:h-20"
+            }`}
           />
         </Link>
 
@@ -107,7 +116,7 @@ export function SiteHeader() {
       {open && (
         <nav
           id="mobile-nav"
-          className="border-t border-white/10 bg-navy px-5 pt-2 pb-6 md:hidden"
+          className="border-t border-white/10 px-5 pt-2 pb-6 md:hidden"
         >
           {NAV_LINKS.map((link) => (
             <Link

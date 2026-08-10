@@ -97,7 +97,7 @@ export function Products() {
           Need a grammage or finish not listed here?{" "}
           <a
             href="#contact"
-            className="font-medium text-navy underline underline-offset-4 transition-colors hover:text-copper-700"
+            className="font-medium text-copper-700 underline underline-offset-4 transition-colors hover:text-copper-700"
           >
             Tell us the specification
           </a>{" "}

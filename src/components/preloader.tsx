@@ -21,7 +21,9 @@ export function Preloader() {
         height={LOGO.height}
         quality={90}
         priority
-        className="preloader-mark h-28 w-auto sm:h-40"
+        // Sized by width, not height: the lockup is ~3:1, so a height-based
+        // utility large enough to read on desktop overflows a phone screen.
+        className="preloader-mark h-auto w-[min(78vw,32rem)]"
       />
       <span className="preloader-bar" />
     </div>

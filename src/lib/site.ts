@@ -31,21 +31,25 @@ export const PHONE = {
 } as const;
 
 /**
- * The logo lockup — `public/sribalavinayagapapers.jpg`, 564×210.
+ * The logo lockup — `public/logo-lockup.png`, 1180×390.
  *
- * The artwork has an opaque dark background (#0C0728) baked in, so it is only
- * ever placed on navy: the header is transparent over the hero then turns navy
- * on scroll, and the footer is navy. On a white surface it would show a dark
- * block. The site's --color-navy (#0B0728) is deliberately set to that same
- * value, so the logo's edges disappear into the background.
+ * This is `logo.png` cropped to its alpha bounding box. The supplied file is a
+ * 1254×1254 canvas with the lockup in a band across the middle, so ~69% of its
+ * height is empty padding — every `h-*` utility sizes the canvas, which left
+ * the artwork rendering at roughly a third of the requested height. Cropping
+ * makes the box and the artwork the same thing, so `h-24` means a 24-high logo.
+ * Re-crop with the same alpha-bounding-box trim if the source is ever replaced.
+ *
+ * The background is genuinely transparent and the wordmark is white, so it
+ * needs a dark surface — every placement (header, footer, preloader) is navy.
  *
  * `width`/`height` are the file's real pixel dimensions; they reserve layout
  * space so nothing shifts while it loads. Displayed size is CSS-controlled.
  */
 export const LOGO = {
-  src: "/sribalavinayagapapers.jpg",
-  width: 564,
-  height: 210,
+  src: "/logo-lockup.png",
+  width: 1180,
+  height: 390,
   alt: "Sri Balavinayaga Papers",
 } as const;
 

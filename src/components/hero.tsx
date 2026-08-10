@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PHONE } from "@/lib/site";
@@ -25,20 +26,58 @@ export function Hero() {
   return (
     <section className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-navy text-white">
       {/*
-       * Backdrop is layered CSS gradients rather than an image: zero bytes, no
-       * network request, and it leaves the <h1> as the LCP element.
+       * Backdrop stack, painted in DOM order — all at `-z-10`, so they layer by
+       * source position and sit behind the copy.
        *
-       * When real photography arrives (a port, a reel stack, a press floor),
-       * drop a <next/image fill priority sizes="100vw" /> in here — the layout
-       * is already sized for it and the gradients stay as the loading colour.
+       *   1. Gradients — the loading colour, still visible until the photograph
+       *      decodes and through the scrims afterwards.
+       *   2. The photograph.
+       *   3. Scrims, which are what make white copy legible over it.
+       *
+       * `priority` because this is now the LCP element.
        */}
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-[radial-gradient(110%_75%_at_78%_0%,#2a1e4a_0%,transparent_58%),radial-gradient(80%_55%_at_8%_100%,#1b1436_0%,transparent_62%),radial-gradient(55%_38%_at_86%_12%,rgba(198,132,74,0.18)_0%,transparent_70%)]"
       />
+      <Image
+        src="/hero.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        // `object-right` keeps the reel stack in frame on narrow viewports,
+        // where object-cover would otherwise crop it to bare warehouse floor.
+        className="-z-10 object-cover object-right"
+      />
+
+      {/*
+       * Four scrims, each doing one job. Together they have to buy contrast for
+       * white copy without flattening the photograph into a dark rectangle —
+       * hence a light overall wash and directional ramps, rather than one heavy
+       * tint everywhere.
+       *
+       *   · A flat navy wash pulls the photograph into the brand hue and takes
+       *     the glare off the white reels.
+       *   · The bottom ramp sits under the headline, body copy and stats, which
+       *     are anchored to the bottom of the section.
+       *   · The left ramp covers the text column on wide viewports, where the
+       *     copy stops well short of the right edge and the reels can stay
+       *     bright over there.
+       *   · The top band buys contrast for the header while it is transparent.
+       */}
+      <div aria-hidden className="absolute inset-0 -z-10 bg-navy/25" />
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-64 bg-linear-to-t from-navy to-transparent"
+        className="absolute inset-x-0 bottom-0 -z-10 h-[80%] bg-linear-to-t from-navy from-8% via-navy/60 via-50% to-transparent"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 -z-10 w-full bg-linear-to-r from-navy/75 via-navy/25 via-45% to-transparent lg:w-3/4"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 -z-10 h-44 bg-linear-to-b from-navy/85 via-navy/40 via-55% to-transparent"
       />
 
       <div className="mx-auto w-full max-w-6xl px-5 pt-36 pb-14 sm:px-8 sm:pt-40 sm:pb-20">
@@ -50,10 +89,10 @@ export function Hero() {
         </p>
 
         <h1
-          className="reveal mt-6 max-w-4xl text-hero font-bold text-balance"
+          className="reveal mt-6 max-w-[750px] text-hero font-bold text-balance"
           style={{ animationDelay: "var(--enter-delay)" }}
         >
-          Imported paper and board, delivered across India.
+          Complete Imported Papers and Boards <br /> solutions
         </h1>
 
         <p

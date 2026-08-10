@@ -21,7 +21,7 @@ export function SiteFooter() {
             width={LOGO.width}
             height={LOGO.height}
             quality={90}
-            className="h-20 w-auto"
+            className="h-28 w-auto"
           />
           <p className="mt-6 max-w-sm text-base leading-relaxed text-white/60">
             Importer and wholesale distributor of premium printing and packaging

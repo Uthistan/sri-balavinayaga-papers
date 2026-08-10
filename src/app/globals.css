@@ -29,7 +29,7 @@
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
   /* Fluid display sizes: one clamp() replaces four responsive overrides each. */
-  --text-hero: clamp(2.5rem, 1.25rem + 5vw, 5.25rem);
+  --text-hero: clamp(2.5rem, 1.25rem + 5vw, 4rem);
   --text-hero--line-height: 0.98;
   --text-hero--letter-spacing: -0.02em;
 
@@ -79,6 +79,67 @@
   /* The preloader finishes lifting at ~1.15s. Hero entrances wait for it so
      they aren't played out of sight behind the overlay. */
   --enter-delay: 1.15s;
+}
+
+/*
+ * Liquid-glass header surface.
+ *
+ * Applied to a panel behind the header contents, faded in once the page has
+ * scrolled. Four layers make it read as glass rather than as a flat tint:
+ *
+ *   1. `backdrop-filter` blurs and over-saturates whatever passes underneath,
+ *      so the bar picks up the colour of the section behind it.
+ *   2. A navy gradient tint keeps it in the brand hue and holds white text at
+ *      accessible contrast over both the dark hero and the white sections.
+ *   3. A blue specular bloom in the upper left gives the pane a lit edge.
+ *   4. `inset 0 1px 0` draws the 1px highlight along the top edge that reads as
+ *      the lip of a piece of glass; the drop shadow lifts it off the content.
+ *
+ * The tint stays deliberately heavy (0.78 → 0.68 alpha). It is what keeps the
+ * pane darker in every channel than the logo's baked-in #0C0728 plate, which is
+ * the condition `mix-blend-lighten` needs to erase that plate — see
+ * <SiteHeader />. A lighter, airier glass would make the plate reappear.
+ */
+.glass-nav {
+  background-image:
+    radial-gradient(
+      120% 140% at 12% 0%,
+      rgb(96 122 255 / 0.16) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(26 19 56 / 0.78) 0%,
+      rgb(11 7 40 / 0.68) 100%
+    );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 10px 30px -12px rgb(0 0 0 / 0.55);
+}
+
+/*
+ * Fallbacks. Both drop to near-opaque navy — the same surface the header used
+ * before, so contrast and the logo plate trick hold up either way.
+ */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .glass-nav {
+    background-image: none;
+    background-color: rgb(11 7 40 / 0.97);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-nav {
+    background-image: none;
+    background-color: var(--color-navy);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 /*
